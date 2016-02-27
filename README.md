@@ -1,1 +1,3 @@
 # Gandolfing
+
+Czytać readme!

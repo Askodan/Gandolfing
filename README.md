@@ -1,4 +1,5 @@
-# Gandolfing
+﻿# Gandolfing
 
 Czytać readme!
 Piehdolsie
+nie

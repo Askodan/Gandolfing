@@ -11,13 +11,21 @@ public class GPSLocation : MonoBehaviour
 	public void StopGPS (){
 		
 	}*/
+	[SerializeField] Text Name;
 	[SerializeField] Text Latitude;
 	[SerializeField] Text Longitude;
 	[SerializeField] Text Info;
-
-
+	[SerializeField] Text Distance;
+	[SerializeField] HeritageManager heritages;
+	[SerializeField] FunPlacer funPlacer;
+	[SerializeField] GameObject playerHelper;
+	public float lat;
+	public float lon;
+	public float distance;//do aktywnego zabytku
 
 	IEnumerator InitializeGPS(){
+		if (playerHelper.activeSelf)
+			playerHelper.SetActive (false);
 		
 		if (!Input.location.isEnabledByUser)
 			yield break;
@@ -28,6 +36,8 @@ public class GPSLocation : MonoBehaviour
 		while (Input.location.status == LocationServiceStatus.Initializing/* && maxWait > 0*/)
 		{
 			Info.text = "Waiting";
+			if (playerHelper.activeSelf)
+				playerHelper.SetActive (false);
 			yield return new WaitForSeconds(1);
 			//maxWait--;
 		}
@@ -45,6 +55,8 @@ public class GPSLocation : MonoBehaviour
 		}
 		else
 		{
+			if (!playerHelper.activeSelf)
+				playerHelper.SetActive (true);
 			//Info.text = Input.location.status.ToString();
 			StartCoroutine ("GPSChecker");
 		}
@@ -58,16 +70,40 @@ public class GPSLocation : MonoBehaviour
 			counter++;
 			//if (Input.location.status == LocationServiceStatus.Running) {
 				//Info.text = Input.location.status.ToString ();
-				Latitude.text = "Lat: " + Input.location.lastData.latitude.ToString ();
-				Longitude.text = "Lon: " + Input.location.lastData.longitude.ToString ();
-				yield return new WaitForSeconds (1);
+			lat = Input.location.lastData.latitude;
+			lon = Input.location.lastData.longitude;
+			SetClosestHeritage ();
+			distance = DistanceCalculator.Calculate (
+				lat,
+				lon,
+				heritages.WarsawHeritage [heritages.activeOne].position.x,
+				heritages.WarsawHeritage [heritages.activeOne].position.y)*1000f;
+			Latitude.text = "Lat: " + lat.ToString ();
+			Longitude.text = "Lon: " + lon.ToString ();
+			Distance.text = "Dist: " + distance.ToString ();
+			funPlacer.Place (this);
+			yield return new WaitForSeconds (1);
 			//}
 				
 		}
 	}
-
+	void SetClosestHeritage(){
+		float min = Mathf.Infinity;
+		for(int i =0;i <heritages.WarsawHeritage.Length;i++){
+			if(!heritages.WarsawHeritage[i].visited){
+			float temp = Mathf.Pow (lat-heritages.WarsawHeritage [i].position.x,2)
+				+ Mathf.Pow (lon-heritages.WarsawHeritage [i].position.y,2);
+			if (temp < min) {
+				heritages.activeOne = i;
+				min = temp;
+				}
+			}
+		}
+		Name.text = heritages.WarsawHeritage [heritages.activeOne].name;
+	}
 	public void OnStartGPS(){
-		StartCoroutine ("InitializeGPS");
+		if(Input.location.status!=LocationServiceStatus.Running)
+			StartCoroutine ("InitializeGPS");
 	}
 
 	public void OnStopGPS(){
@@ -78,5 +114,8 @@ public class GPSLocation : MonoBehaviour
 		Info.text = Input.location.status.ToString();
 
 	}
-
+	public void ChangeAccuracy(float accuracy){
+		Input.location.Stop ();
+		Input.location.Start (accuracy);
+	}
 }

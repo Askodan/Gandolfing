@@ -7,6 +7,8 @@ public class OrientationTester : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		Input.compass.enabled = true;
+		//print(DistanceCalculator.Calculate ( 52.21762f, 20.98449f, 52.253f, 21.05097f));
+		//print(DistanceCalculator.Calculate2 (52.253f, 21.05097f, 52.21762f, 20.98449f));
 	}
 	
 	// Update is called once per frame

@@ -5,9 +5,9 @@ public class FunPlacer : MonoBehaviour {
 	[SerializeField] HeritageManager heritageBase;
 	[SerializeField] float distance2show;
 	private bool showFun;
-
+	Vector3 newPosition ;
 	public void Place(GPSLocation location){
-		Vector3 newPosition = CalculateFunPosition (location);
+		newPosition = CalculateFunPosition (location);
 		if (!showFun) {
 			if (location.distance < distance2show) {
 				showFun = true;
@@ -21,9 +21,12 @@ public class FunPlacer : MonoBehaviour {
 				heritageBase.WarsawHeritage[heritageBase.activeOne].fun.SetActive (false);
 				//location.ChangeAccuracy (1f);
 			}
-			heritageBase.WarsawHeritage [heritageBase.activeOne].fun.transform.position = Vector3.Lerp (
-				heritageBase.WarsawHeritage [heritageBase.activeOne].fun.transform.position, newPosition, 5f * Time.deltaTime);
 		}
+	}
+	void Update(){
+		if(showFun)
+		heritageBase.WarsawHeritage [heritageBase.activeOne].fun.transform.position = Vector3.Lerp (
+			heritageBase.WarsawHeritage [heritageBase.activeOne].fun.transform.position, newPosition, 5f * Time.deltaTime);
 	}
 
 	Vector3 CalculateFunPosition(GPSLocation location){
